@@ -38,19 +38,22 @@ Puppet::Parser::Functions::newfunction(:download_file, :type => :rvalue, :doc =>
       Puppet.info "Downloading #{url} to #{file_name}"
       parent_dir = ::File.dirname(file_name)
       ::FileUtils.mkdir_p(parent_dir) unless ::FileTest.exist?(parent_dir)
-      hash = ::Digest::SHA1::new
       ::File.open(file_name, 'wb') do |file|
         open(url, 'rb') do |stream|
           until stream.eof?
-            buf = stream.readpartial(1024)
-            file.write(buf)
-            hash.update(buf)
+            file.write(stream.readpartial(1024))
           end
         end
       end
-      if checksum then
-        fail 'Non-matching SHA-1 checksum' unless checksum == hash.hexdigest
+    end
+    if checksum then
+      hash = ::Digest::SHA1::new
+      ::File.open(file_name, 'rb') do |file|
+        until file.eof?
+          hash.update(file.readpartial(1024))
+        end
       end
+      fail 'Non-matching SHA-1 checksum' unless checksum == hash.hexdigest
     end
 
     # Don't use #{path} as we changed the value in the 'modules' case
