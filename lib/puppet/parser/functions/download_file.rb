@@ -18,6 +18,9 @@ Puppet::Parser::Functions::newfunction(:download_file, :type => :rvalue, :doc =>
 
     mount = args[0]
     path = args[1]
+    url = args[2]
+    checksum = args[3]
+
     if mount == 'modules' then
       module_name, path = path.split('/', 2)
       mod = environment.module(module_name)
@@ -32,11 +35,12 @@ Puppet::Parser::Functions::newfunction(:download_file, :type => :rvalue, :doc =>
     file_name = ::File.join(base_dir, path)
 
     unless ::FileTest.exist?(file_name) then
+      Puppet.info "Downloading #{url} to #{file_name}"
       parent_dir = ::File.dirname(file_name)
       ::FileUtils.mkdir_p(parent_dir) unless ::FileTest.exist?(parent_dir)
       hash = ::Digest::SHA1::new
       ::File.open(file_name, 'wb') do |file|
-        open(args[2], 'rb') do |stream|
+        open(url, 'rb') do |stream|
           until stream.eof?
             buf = stream.readpartial(1024)
             file.write(buf)
@@ -44,8 +48,8 @@ Puppet::Parser::Functions::newfunction(:download_file, :type => :rvalue, :doc =>
           end
         end
       end
-      if args[3] then
-        fail 'Non-matching SHA-1 checksum' unless args[3] == hash.hexdigest
+      if checksum then
+        fail 'Non-matching SHA-1 checksum' unless checksum == hash.hexdigest
       end
     end
 
