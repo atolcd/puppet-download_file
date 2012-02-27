@@ -33,7 +33,10 @@ Puppet::Parser::Functions::newfunction(:download_file, :type => :rvalue, :doc =>
       ::FileUtils.mkdir_p(parent_dir) unless ::FileTest.exist?(parent_dir)
       ::File.open(file_name, 'wb') do |file|
         open(args[2], 'rb') do |stream|
-          file.write(stream.read)
+          until stream.eof?
+            buf = stream.readpartial(1024)
+            file.write(buf)
+          end
         end
       end
     end
