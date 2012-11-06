@@ -41,7 +41,12 @@ Puppet::Parser::Functions::newfunction(:download_file, :type => :rvalue, :doc =>
       ::File.open(file_name, 'wb') do |file|
         open(url, 'rb') do |stream|
           until stream.eof?
-            file.write(stream.readpartial(1024))
+            # StringIO doesn't support :readpartial
+            if stream.respond_to?(:readpartial)
+              file.write(stream.readpartial(1024))
+            else
+              file.write(stream.read(1024))
+            end
           end
         end
       end
