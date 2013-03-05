@@ -25,12 +25,19 @@ Puppet::Parser::Functions::newfunction(:download_file, :type => :rvalue, :doc =>
       module_name, path = path.split('/', 2)
       mod = environment.module(module_name)
       base_dir = mod.file(nil)
+      file_prefix = 'puppet'
+    elsif Puppet.settings[:name] == 'apply' and ::FileTest.directory?('/vagrant')
+      # Assume we're in a Vagrant box
+      base_dir = '/vagrant'
+      file_prefix = 'file'
+      mount = 'vagrant'
     else
       mnt = Puppet::FileServing::Configuration.configuration.find_mount(mount, environment)
       if not mnt then
         self.fail "No mount found named #{mount}"
       end
       base_dir = mnt.path(compiler.node)
+      file_prefix = 'puppet'
     end
     file_name = ::File.join(base_dir, path)
 
@@ -62,5 +69,5 @@ Puppet::Parser::Functions::newfunction(:download_file, :type => :rvalue, :doc =>
     end
 
     # Don't use #{path} as we changed the value in the 'modules' case
-    "puppet:///#{mount}/#{args[1]}"
+    "#{file_prefix}:///#{mount}/#{args[1]}"
 end
