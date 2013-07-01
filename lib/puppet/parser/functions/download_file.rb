@@ -31,6 +31,11 @@ Puppet::Parser::Functions::newfunction(:download_file, :type => :rvalue, :doc =>
       base_dir = '/vagrant'
       file_prefix = 'file'
       mount = 'vagrant'
+    elsif Puppet.settings[:name] == 'apply'
+      # Assume we're on a dev server
+      base_dir = '/var/cache/download_file'
+      file_prefix = 'file'
+      mount = 'var/cache/download_file'
     else
       mnt = Puppet::FileServing::Configuration.configuration.find_mount(mount, environment)
       if not mnt then
