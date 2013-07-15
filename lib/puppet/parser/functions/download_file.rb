@@ -28,9 +28,9 @@ Puppet::Parser::Functions::newfunction(:download_file, :type => :rvalue, :doc =>
       file_prefix = 'puppet'
     elsif Puppet.settings[:name] == 'apply' and ::FileTest.directory?('/vagrant')
       # Assume we're in a Vagrant box
-      base_dir = '/vagrant'
+      base_dir = '/vagrant/.download_file-cache'
       file_prefix = 'file'
-      mount = 'vagrant'
+      mount = 'vagrant/.download_file-cache'
     elsif Puppet.settings[:name] == 'apply'
       # Assume we're on a dev server
       base_dir = '/var/cache/download_file'
