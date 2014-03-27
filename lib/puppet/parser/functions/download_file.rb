@@ -26,12 +26,12 @@ Puppet::Parser::Functions::newfunction(:download_file, :type => :rvalue, :doc =>
       mod = environment.module(module_name)
       base_dir = mod.file(nil)
       file_prefix = 'puppet'
-    elsif Puppet.settings[:name] == 'apply' and ::FileTest.directory?('/vagrant')
+    elsif Puppet.settings[:name].to_s == 'apply' and ::FileTest.directory?('/vagrant')
       # Assume we're in a Vagrant box
       base_dir = '/vagrant/.download_file-cache'
       file_prefix = 'file'
       mount = 'vagrant/.download_file-cache'
-    elsif Puppet.settings[:name] == 'apply'
+    elsif Puppet.settings[:name].to_s == 'apply'
       # Assume we're on a dev server
       base_dir = '/var/cache/download_file'
       file_prefix = 'file'
